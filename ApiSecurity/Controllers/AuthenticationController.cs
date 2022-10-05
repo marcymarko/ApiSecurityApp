@@ -20,7 +20,7 @@ public class AuthenticationController : ControllerBase
     }
 
     public record AuthenticationData(string? UserName, string? Password);
-    public record UserData(int UserId, string UserName);
+    public record UserData(int UserId, string UserName, string Title, string EmployeeId);
     //   api/authentication/token
     [HttpPost("token")]
     public ActionResult<string> Authenticate([FromBody]  AuthenticationData data)
@@ -48,6 +48,8 @@ public class AuthenticationController : ControllerBase
         List<Claim> claims = new();
         claims.Add(new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()));
         claims.Add(new(JwtRegisteredClaimNames.UniqueName, user.UserName));
+        claims.Add(new("title", user.Title));
+        claims.Add(new("employeeId", user.EmployeeId));
 
         var token = new JwtSecurityToken(
             _config.GetValue<string>("Authentication:Issuer"),
@@ -66,12 +68,12 @@ public class AuthenticationController : ControllerBase
         // THIS IS ONLY A DEMO - DO NOT TRY THIS AT HOME
         if(CompareValues(data.UserName, "markz") && CompareValues(data.Password, "markz"))
         {
-            return new UserData(1, data.UserName!);
+            return new UserData(1, data.UserName!, "Business Owner", "E001");
         }
 
         if (CompareValues(data.UserName, "sstorm") && CompareValues(data.Password, "sstorm"))
         {
-            return new UserData(2, data.UserName!);
+            return new UserData(2, data.UserName!, "Lox", "E005");
         }
 
         return null;
